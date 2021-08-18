@@ -31,10 +31,14 @@ void setup_io(void);
 void setup_timers(void);
 void display_int(int num);
 void delay_1_sec(void);
-void display(int tally);
+void update_digits_array(int tally);
 
 int turd_tally = 1;
 int disp_on_time = 1; // seconds to still keep display on for
+
+ISR(INT0_vect){
+  set_digit(1,1);
+}
 
 
 int main(void)
@@ -50,17 +54,22 @@ int main(void)
   
     while (true) 
     {
-      if(disp_on_time > 0){
-        sleep_disable();
-        display(turd_tally);
-      } //else{
-       // sleep_enable();
-      //}
+//      if((PIND & (1<<2)) == 0){
+//        set_digit(1, 1);
+//      } else{
+//        set_digit(1,2);
+//      }
+//      if(disp_on_time > 0){
+//        sleep_disable();
+//        update_digits_array(turd_tally);
+//      } //else{
+//       // sleep_enable();
+//      //}
     }
                       
 }
 
-void display(int tally){
+void update_digits_array(int tally){
   static int temp_tally = -1;
   static int digits[4]; 
   if(temp_tally != tally){ // if tally changed, recalculate digits;
@@ -74,17 +83,7 @@ void display(int tally){
       digits[i] = -1;
       i--;
     }
-  }
-
-  set_digit(1, digits[0]);
-  _delay_ms(DIGIT_DELAY);
-  set_digit(2, digits[1]);
-  _delay_ms(DIGIT_DELAY);
-  set_digit(3, digits[2]);
-  _delay_ms(DIGIT_DELAY);
-  set_digit(4, digits[3]);
-  _delay_ms(DIGIT_DELAY); 
-  
+  }  
 }
 
 
@@ -96,18 +95,18 @@ void delay_1_sec(void){
 
 // set proper bits to output
 void setup_io(void){
-    DDRB |= (1<<DDB7) |(1<<DDB6) |(1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
-    DDRC |= (1<<DDC5) | (1<<DDC4) | (1<<DDC3) | (1<<DDC2) | (1<<DDC1) | (1<<DDC0);
-    DDRD |= (1<<DDD7) | (0<<DDD6) | (1<<DDD4) | (1<<DDD3) | (1<<DDD2);
+    MCUCR |= (0 << PUD); // set internal pull-up resistor
+    EICRA = 0b1010; // set external interrupts to occur on falling edge (button release)
+    EIMSK = 0b11; // enable external interrupts 0 and 1
+    sei(); // enable global interrupts
+    DDRB = 0b01111111;
+    DDRC = 0b00111111;
+    DDRD = 0b00010011;
 }
 
 
 void setup_timers(void){
-  TCCR0B |= (1 << CS02) // set up timer with prescaler = 256 
-  TCNT0 = 0 // initialize counter 
-  TIMSK0 |= (1 << TOIE0) // enable overflow interrupt 
-  sei() // enable global interrupts 
-  tot_overflow = 0 // initialize overflow counter variable
+  TCCR0B |= (1 << CS02); // set up timer with prescaler = 256 
 }
 
 void set_digit(int digit, int number){
