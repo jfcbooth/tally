@@ -6,7 +6,7 @@
  */ 
 #undef F_CPU
 #define F_CPU 1000000UL
-#define DISPLAY_SECS 10
+#define DISP_ON_TIME 3
 #define DIGIT_DELAY 25
 #include <avr/io.h>
 #include <util/delay.h>
@@ -33,13 +33,26 @@ void display_int(int num);
 void delay_1_sec(void);
 void update_digits_array(int tally);
 
-int turd_tally = 1;
-int disp_on_time = 1; // seconds to still keep display on for
+int turd_tally = 0;
+int disp_on_time = 0; // seconds to still keep display on for
+int digits[4]; 
 
+// display interrupt
 ISR(INT0_vect){
-  set_digit(1,1);
+  SMCR &= ~(0<<SE); // sleep_disable();
+  update_digits_array(turd_tally);
+  disp_on_time = DISP_ON_TIME; // set number of seconds to keep display on for
+  TCNT1 = 0; // reset DISP_ON_TIME timer
 }
 
+// increment interrupt
+ISR(INT1_vect){
+  SMCR &= ~(1<<SE); // sleep_disable();
+  turd_tally++;
+  update_digits_array(turd_tally);
+  disp_on_time = DISP_ON_TIME;
+  TCNT1 = 0; // reset DISP_ON_TIME timer
+}
 
 int main(void)
 {
@@ -47,31 +60,57 @@ int main(void)
   setup_timers();
   //enable interrupts
 
-  
-  set_sleep_mode(0b010 << 1); // set sleep mode to power-down   //SMCR = 00000100; // enable Power-down mode (bit 0 is sleep enable);
+  PRR = 0b11000111;
+  SMCR |= (0b010 << 1);
+  //set_sleep_mode(0b010 << 1); // set sleep mode to power-down   //SMCR = 00000100; // enable Power-down mode (bit 0 is sleep enable);
   
   all_off(); // make sure all LEDs start as off
-  
+  int digit_to_display = 0;
+  int overflows = 0;
     while (true) 
     {
-//      if((PIND & (1<<2)) == 0){
-//        set_digit(1, 1);
-//      } else{
-//        set_digit(1,2);
-//      }
+      
+      if(TCNT1 >= 7812){ // every second decrement the number of seconds to keep the display on
+        disp_on_time = (disp_on_time > 0) ? disp_on_time-1 : 0;
+        TCNT1 = 0; // reset timer
+      }
+      // display current turd tally
+      if(disp_on_time > 0){
+        if((TIFR0 & (1<<TOV1))==1){ // digit flicker timer
+          overflows++;
+          TCNT0 = 0; // reset timer
+          TIFR0 &= 0b0;
+        }
+        if(overflows >= 1000){ // if enough overflows have passed
+          set_digit(digit_to_display+1,digits[digit_to_display]);
+          digit_to_display = (digit_to_display >= 3) ? 0 : digit_to_display+1;
+          //set_digit(1, disp_on_time);
+          overflows=0;
+        }
+      } else {
+        PORTC = 0b00000000; // turn off the display
+        SMCR |= 0b1; // enable sleep bit
+        MCUCR |= (0b11<<6);
+        MCUCR |= (0b10<<6);
+        asm("SLEEP"); // sleep instruction
+      }
+      //set_digit(1, disp_on_time);
+      
 //      if(disp_on_time > 0){
-//        sleep_disable();
+////        sleep_disable();
 //        update_digits_array(turd_tally);
-//      } //else{
-//       // sleep_enable();
-//      //}
+//        set_digit(digit_to_display+1,digits[digit_to_display]);
+//        digit_to_display = (digit_to_display >= 3) ? 0 : digit_to_display+1;
+//      } else{
+//            all_off();
+////       // sleep_enable();
+//      }
     }
                       
 }
 
 void update_digits_array(int tally){
   static int temp_tally = -1;
-  static int digits[4]; 
   if(temp_tally != tally){ // if tally changed, recalculate digits;
     temp_tally = tally;
     for(int i = 0; i < 4; i++){
@@ -86,16 +125,9 @@ void update_digits_array(int tally){
   }  
 }
 
-
-void delay_1_sec(void){
-  for(int i = 0; i < 8; i ++){
-    _delay_ms(1000);
-  }
-}
-
 // set proper bits to output
 void setup_io(void){
-    MCUCR |= (0 << PUD); // set internal pull-up resistor
+    MCUCR &= (0 << PUD); // set internal pull-up resistor
     EICRA = 0b1010; // set external interrupts to occur on falling edge (button release)
     EIMSK = 0b11; // enable external interrupts 0 and 1
     sei(); // enable global interrupts
@@ -106,7 +138,9 @@ void setup_io(void){
 
 
 void setup_timers(void){
-  TCCR0B |= (1 << CS02); // set up timer with prescaler = 256 
+  //   TCCR1B = 000000011; // set 1024 prescalar
+  TCCR0B |= ((1 << CS12) | (1 << CS10)); // 8-bit timer, 1024 prescalar
+  TCCR1B |= ((1 << CS12) | (1 << CS10)); // 16-bit timer, 1 second passes at tick 15625
 }
 
 void set_digit(int digit, int number){
@@ -168,6 +202,13 @@ void set_digit(int digit, int number){
     default:
       digit_off();
       break;
+  }
+}
+
+
+void delay_1_sec(void){
+  for(int i = 0; i < 8; i ++){
+    _delay_ms(1000);
   }
 }
 
