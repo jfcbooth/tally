@@ -8,6 +8,7 @@
 #define F_CPU 1000000UL
 #define DISP_ON_TIME 3
 #define DIGIT_DELAY 25
+#define DEBOUNCE_TIME 1000
 #include <avr/io.h>
 #include <util/delay.h>
 #include <EEPROM.h>
@@ -32,7 +33,8 @@ void setup_timers(void);
 void display_int(int num);
 void delay_1_sec(void);
 void update_digits_array(int tally);
-
+int read_tally(void);
+void write_tally(int tally);
 int turd_tally = 0;
 int disp_on_time = 0; // seconds to still keep display on for
 int digits[4]; 
@@ -49,20 +51,37 @@ ISR(INT0_vect){
 ISR(INT1_vect){
   SMCR &= ~(1<<SE); // sleep_disable();
   turd_tally++;
+  write_tally(turd_tally);
   update_digits_array(turd_tally);
   disp_on_time = DISP_ON_TIME;
   TCNT1 = 0; // reset DISP_ON_TIME timer
 }
 
+
+int read_button(int debounce_time){
+    int x = 0;
+    int last_switch = 0;
+    while(x < debounce_time){
+        last_switch = (PIND & (1<<PIND2)); // read SW0
+        for(x = 0; x < debounce_time; x++){
+            if((PIND & (1<<PIND2)) != last_switch){
+                break;
+            }
+        }
+    }
+    return last_switch;
+}
+
+
 int main(void)
 {
   setup_io();
   setup_timers();
+  turd_tally = read_tally(); // restore value on boot
   //enable interrupts
 
   PRR = 0b11000111;
   SMCR |= (0b010 << 1);
-  //set_sleep_mode(0b010 << 1); // set sleep mode to power-down   //SMCR = 00000100; // enable Power-down mode (bit 0 is sleep enable);
   
   all_off(); // make sure all LEDs start as off
   int digit_to_display = 0;
@@ -141,6 +160,18 @@ void setup_timers(void){
   //   TCCR1B = 000000011; // set 1024 prescalar
   TCCR0B |= ((1 << CS12) | (1 << CS10)); // 8-bit timer, 1024 prescalar
   TCCR1B |= ((1 << CS12) | (1 << CS10)); // 16-bit timer, 1 second passes at tick 15625
+}
+
+int read_tally(void){
+  return ((EEPROM.read(1) << 8) |  
+  
+  (EEPROM.read(0) & 0b11111111));
+  //return EEPROM.read(0);
+}
+
+void write_tally(int tally){
+  EEPROM.write(0, (tally & 0b11111111));
+  EEPROM.write(1, ((tally>>8) & 0b11111111));
 }
 
 void set_digit(int digit, int number){
