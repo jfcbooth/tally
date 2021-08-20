@@ -6,7 +6,7 @@
  */ 
 #undef F_CPU
 #define F_CPU 1000000UL
-#define DISP_ON_TIME 3
+#define DISP_ON_TIME 5
 #define DIGIT_DELAY 25
 #define DEBOUNCE_TIME 1000
 #include <avr/io.h>
@@ -51,26 +51,26 @@ ISR(INT0_vect){
 ISR(INT1_vect){
   SMCR &= ~(1<<SE); // sleep_disable();
   turd_tally++;
-  write_tally(turd_tally);
-  update_digits_array(turd_tally);
+  write_tally(turd_tally); // reflect increment in EEPROM
+  update_digits_array(turd_tally); // change digits array so it shows on the display
   disp_on_time = DISP_ON_TIME;
   TCNT1 = 0; // reset DISP_ON_TIME timer
 }
 
 
-int read_button(int debounce_time){
-    int x = 0;
-    int last_switch = 0;
-    while(x < debounce_time){
-        last_switch = (PIND & (1<<PIND2)); // read SW0
-        for(x = 0; x < debounce_time; x++){
-            if((PIND & (1<<PIND2)) != last_switch){
-                break;
-            }
-        }
-    }
-    return last_switch;
-}
+//int read_button(int debounce_time){
+//    int x = 0;
+//    int last_switch = 0;
+//    while(x < debounce_time){
+//        last_switch = (PIND & (1<<PIND3)); // read SW0
+//        for(x = 0; x < debounce_time; x++){
+//            if((PIND & (1<<PIND3)) != last_switch){
+//                break;
+//            }
+//        }
+//    }
+//    return last_switch;
+//}
 
 
 int main(void)
@@ -95,6 +95,12 @@ int main(void)
       }
       // display current turd tally
       if(disp_on_time > 0){
+//        if(read_button(5000)){ // if increment button was pressed
+//          turd_tally++;
+//          write_tally(turd_tally); // reflect increment in EEPROM
+//          update_digits_array(turd_tally); // change digits array so it shows on the display
+//        }
+        // next 2 if statemnts control how long each digit is displayed between the 4 digits
         if((TIFR0 & (1<<TOV1))==1){ // digit flicker timer
           overflows++;
           TCNT0 = 0; // reset timer
@@ -109,7 +115,7 @@ int main(void)
       } else {
         PORTC = 0b00000000; // turn off the display
         SMCR |= 0b1; // enable sleep bit
-        MCUCR |= (0b11<<6);
+        MCUCR |= (0b11<<6); // turn off brown out detection
         MCUCR |= (0b10<<6);
         asm("SLEEP"); // sleep instruction
       }
