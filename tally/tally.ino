@@ -4,11 +4,14 @@
  * Created: 7/27/2021 7:10:25 PM
  * Author : user
  */ 
+
+#define RESET_TALLY // uncomment to reset the tally to 0
+
 #undef F_CPU
 #define F_CPU 1000000UL
 #define DISP_ON_TIME 5
 #define DIGIT_DELAY 25
-#define DEBOUNCE_TIME 1000
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <EEPROM.h>
@@ -28,18 +31,18 @@ void nine(void);
 void digit_off(void);
 void all_off(void);
 void set_digit(int digit, int number);
-void setup_io(void);
-void setup_timers(void);
+void setup(void);
 void display_int(int num);
 void delay_1_sec(void);
 void update_digits_array(int tally);
 int read_tally(void);
 void write_tally(int tally);
-int turd_tally = 0;
+
+int turd_tally = 0; // actual tally
 int disp_on_time = 0; // seconds to still keep display on for
 int digits[4]; 
 
-// display interrupt
+// display current tally interrupt
 ISR(INT0_vect){
   SMCR &= ~(0<<SE); // sleep_disable();
   update_digits_array(turd_tally);
@@ -50,7 +53,7 @@ ISR(INT0_vect){
 // increment interrupt
 ISR(INT1_vect){
   SMCR &= ~(1<<SE); // sleep_disable();
-  turd_tally++;
+  turd_tally = (turd_tally >= 9999) ? 1 : turd_tally+1;
   write_tally(turd_tally); // reflect increment in EEPROM
   update_digits_array(turd_tally); // change digits array so it shows on the display
   disp_on_time = DISP_ON_TIME;
@@ -58,28 +61,15 @@ ISR(INT1_vect){
 }
 
 
-//int read_button(int debounce_time){
-//    int x = 0;
-//    int last_switch = 0;
-//    while(x < debounce_time){
-//        last_switch = (PIND & (1<<PIND3)); // read SW0
-//        for(x = 0; x < debounce_time; x++){
-//            if((PIND & (1<<PIND3)) != last_switch){
-//                break;
-//            }
-//        }
-//    }
-//    return last_switch;
-//}
-
-
 int main(void)
 {
-  setup_io();
-  setup_timers();
-  turd_tally = read_tally(); // restore value on boot
-  //enable interrupts
+  setup();
 
+  #if defined(RESET_TALLY) // define to reset tally count
+    write_tally(0);
+  #endif
+
+  turd_tally = read_tally(); // restore value on boot
   PRR = 0b11000111;
   SMCR |= (0b010 << 1);
   
@@ -95,11 +85,6 @@ int main(void)
       }
       // display current turd tally
       if(disp_on_time > 0){
-//        if(read_button(5000)){ // if increment button was pressed
-//          turd_tally++;
-//          write_tally(turd_tally); // reflect increment in EEPROM
-//          update_digits_array(turd_tally); // change digits array so it shows on the display
-//        }
         // next 2 if statemnts control how long each digit is displayed between the 4 digits
         if((TIFR0 & (1<<TOV1))==1){ // digit flicker timer
           overflows++;
@@ -119,17 +104,6 @@ int main(void)
         MCUCR |= (0b10<<6);
         asm("SLEEP"); // sleep instruction
       }
-      //set_digit(1, disp_on_time);
-      
-//      if(disp_on_time > 0){
-////        sleep_disable();
-//        update_digits_array(turd_tally);
-//        set_digit(digit_to_display+1,digits[digit_to_display]);
-//        digit_to_display = (digit_to_display >= 3) ? 0 : digit_to_display+1;
-//      } else{
-//            all_off();
-////       // sleep_enable();
-//      }
     }
                       
 }
@@ -151,7 +125,7 @@ void update_digits_array(int tally){
 }
 
 // set proper bits to output
-void setup_io(void){
+void setup(void){
     MCUCR &= (0 << PUD); // set internal pull-up resistor
     EICRA = 0b1010; // set external interrupts to occur on falling edge (button release)
     EIMSK = 0b11; // enable external interrupts 0 and 1
@@ -159,13 +133,8 @@ void setup_io(void){
     DDRB = 0b01111111;
     DDRC = 0b00111111;
     DDRD = 0b00010011;
-}
-
-
-void setup_timers(void){
-  //   TCCR1B = 000000011; // set 1024 prescalar
-  TCCR0B |= ((1 << CS12) | (1 << CS10)); // 8-bit timer, 1024 prescalar
-  TCCR1B |= ((1 << CS12) | (1 << CS10)); // 16-bit timer, 1 second passes at tick 15625
+    TCCR0B |= ((1 << CS12) | (1 << CS10)); // 8-bit timer, 1024 prescalar
+    TCCR1B |= ((1 << CS12) | (1 << CS10)); // 16-bit timer, 1 second passes at tick 15625
 }
 
 int read_tally(void){
@@ -249,12 +218,9 @@ void delay_1_sec(void){
   }
 }
 
-/************************************************************************/
-/* turns on a one in the specified digit (0-4)                          */
-/************************************************************************/
+
 void zero(void){
   PORTB = 0b01000000;
-
 }
 
 void one(void){
