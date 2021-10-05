@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Turd Tally
 
 If you've ever been curious as to how many times a toilet is used, then this project is for you.
@@ -55,3 +56,7 @@ I ordered my PCB's through JLCPCB. If ordering through them, you can just upload
 The case is 3d printed, for the back plate, print it laying flat.
 For the case, orient it standing tall with the cherry mx switches toward the top.
 It needs printed with a .2mm nozzle for the front lettering to print properly
+=======
+# tally
+Arduino sketch for an ATMEGA328P to increment a counter.
+>>>>>>> ee5905fba72e30abeed3494db791b5f0ad1a8dab
