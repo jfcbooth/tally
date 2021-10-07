@@ -35,14 +35,15 @@ PORT-> select your COM port
 Programmer->Arduino as ISP  
 Burn bootloader  
 
-If it doesn't upload, connect it was configured to use an external 16Mhz clock from the factory. Connect ATMEGA328 like this at end repeat above steps:  
+If it doesn't upload,  it was configured to use an external 16Mhz clock from the factory. You will need a 16Mhz clock which can be de-soldered from an old/dead arduino and 2 22nF capacitors. Connect the ATMEGA328 like this at end repeat above steps to set the fuses to not need the 16Mhz crystal anymore. Afer burning the bootloader (which sets the fuses), you can remove the crystal from the setup: 
+
 ![16Mhz clock flash](https://www.arduino.cc/wiki/static/c3f22e90bda8cfd4f75bdff576559cdf/b53cf/BreadboardAVR.png)  
 
 2.) Upload Sketch  
-Open arduino sketch in src  
-Upload as programmer  
+ - Open arduino sketch in src  
+ - Upload as programmer  (shift click on upload button)
 
-3.) Install ATMEGA328P into PCB  
+3.) Install ATMEGA328P into PCB  (Note the orientation)
 
 ## PCB
 | Hardware | Quantity | Purchase location |
