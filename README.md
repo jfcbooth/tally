@@ -1,8 +1,3 @@
-# Turd Tally
-
-If you've ever been curious as to how many times a toilet is used, then this project is for you.
-When you use the bathroom, simply click the up arrow and the counter increments.
-
 All files necessary to build one for yourself are included in this repository.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
