@@ -70,7 +70,8 @@ Trying configuring the ATMEGA328 with the internal clock first, but if the code 
 | 2468 | 1 | [mouser](https://www.mouser.com/ProductDetail/534-2468) |
 | Cherry MX Switch Blue | 2 | [amazon](https://www.amazon.com/Cherry-switches-MX1AG1NN-Mechanical-Keyboard/dp/B07RQTNS58/ref=sr_1_3?dchild=1&keywords=cherry+mx+blue+switch&qid=1633447512&sr=8-3) |
 
-I ordered my PCB's through JLCPCB. If ordering through them, you can just upload the tally_cam_data.zip zip file in the schematics folder to their website.  
+I ordered my PCB's through JLCPCB.  
+If ordering through them, you can just upload the tally_cam_data.zip zip file in the schematics folder to their website.  
 I was supposed to be able to make this design at my university, but none of my professors know how to use the lab eqipment, so I had to order them through a 3rd party. Go Raiders!  
 
 1.) Solder components to PCB (except cherry mx switches)  
@@ -79,6 +80,6 @@ I was supposed to be able to make this design at my university, but none of my p
 4.) Install Cherry MX switches and solder them to the board  
 
 ## Case
-The case is 3d printed, for the back plate, print it laying flat.
-For the case, orient it standing tall with the cherry mx switches toward the top.
-It needs printed with a .2mm nozzle for the front lettering to print properly
+For the case, orient it standing tall with the cherry mx switches toward the top.  
+It needs printed with a .2mm nozzle for the front lettering to print properly.  
+The case is 3d printed, for the back plate, print it laying flat.  
