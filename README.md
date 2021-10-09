@@ -2,10 +2,14 @@
 
 If you've ever been curious as to how many times a toilet is used, then this project is for you.
 When you use the bathroom, simply click the up arrow and the counter increments.
+<p align="center">
+<img src="https://github.com/jfcbooth/tally/blob/main/pictures/20211008_170915.jpg" alt="TT" width="300"/>
+</p>
 
 ## Resetting the tally
 To reset the counter to 0, press either button to wake the device from sleep, then press the small yellow button on the back of the PCB (labelled BTN).
-![BTN Image](blob:https://imgur.com/a444c7df-6102-489d-99a5-56b41e65aee2)
+
+<img src="https://github.com/jfcbooth/tally/blob/main/pictures/20211008_204949.jpg" alt="BTN" width="200"/>
 
 All files necessary to build one for yourself are included in this repository.
 
