@@ -1,3 +1,12 @@
+# Turd Tally
+
+If you've ever been curious as to how many times a toilet is used, then this project is for you.
+When you use the bathroom, simply click the up arrow and the counter increments.
+
+## Resetting the tally
+To reset the counter to 0, press either button to wake the device from sleep, then press the small yellow button on the back of the PCB (labelled BTN).
+![BTN Image](blob:https://imgur.com/a444c7df-6102-489d-99a5-56b41e65aee2)
+
 All files necessary to build one for yourself are included in this repository.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -16,7 +25,11 @@ All files necessary to build one for yourself are included in this repository.
  - Tools->Board Manager->Search "minicore"->Install  
  - Upload asrduinoISP sketch from arduino software to an arduino uno.  
  - Connect to ATMEGA as shown here:  
-![To flash ATMEGA](https://www.arduino.cc/wiki/static/25a1c2b18f870ce062dff991b689111f/b53cf/SimpleBreadboardAVR.png)  
+
+| Configured with internal clock | Configured with external clock |
+| ----------- | ----------- |
+| ![To flash ATMEGA](https://www.arduino.cc/wiki/static/25a1c2b18f870ce062dff991b689111f/b53cf/SimpleBreadboardAVR.png) | ![16Mhz clock flash](https://www.arduino.cc/wiki/static/c3f22e90bda8cfd4f75bdff576559cdf/b53cf/BreadboardAVR.png) |
+
 
 Arduino Flash Options:  
 Board->Minicore->ATMEGA328P  
@@ -30,9 +43,9 @@ PORT-> select your COM port
 Programmer->Arduino as ISP  
 Burn bootloader  
 
-If it doesn't upload,  it was configured to use an external 16Mhz clock from the factory. You will need a 16Mhz clock which can be de-soldered from an old/dead arduino and 2 22nF capacitors. Connect the ATMEGA328 like this at end repeat above steps to set the fuses to not need the 16Mhz crystal anymore. Afer burning the bootloader (which sets the fuses), you can remove the crystal from the setup: 
+Trying configuring the ATMEGA328 with the internal clock first, but if the code doesn't upload, it was probably configured to use an external 16Mhz clock from the factory. You will need a 16Mhz clock which can be de-soldered from an old/dead arduino and 2 22nF capacitors. After burning the bootloader (which sets the fuses), you can remove the crystal and won't need it when uploading sketches from now on. If the code still doesn't upload, make sure all grounds are connected and the supplied voltage is >3V.
 
-![16Mhz clock flash](https://www.arduino.cc/wiki/static/c3f22e90bda8cfd4f75bdff576559cdf/b53cf/BreadboardAVR.png)  
+
 
 2.) Upload Sketch  
  - Open arduino sketch in src  
