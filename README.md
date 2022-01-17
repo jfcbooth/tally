@@ -1,5 +1,8 @@
 # Tally
 
+While this is quite a goofy project that was conceived while joking around with friends, the core engineering is a great display of my abilities.  
+# 
+
 If you've ever been curious as to how many times a toilet has been used, then this project is for you.
 When you use the bathroom, simply click the up arrow and the counter increments.
 <p align="center">
