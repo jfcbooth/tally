@@ -1,10 +1,6 @@
 # Tally
-
-While this is quite a goofy project that was conceived while joking around with friends, the core engineering is a great display of my abilities.  
-# 
-
-If you've ever been curious as to how many times a toilet has been used, then this project is for you.
-When you use the bathroom, simply click the up arrow and the counter increments.
+ 
+A battery-powered seven-segment display counter using a custom PCB. A counter like this can have many unique purposes and can be quickly modified to serve new purpose.
 <p align="center">
 <img src="https://github.com/jfcbooth/tally/blob/main/pictures/tally.jpg" alt="TT" width="300"/>
 </p>
