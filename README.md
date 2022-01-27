@@ -6,7 +6,7 @@ While this is quite a goofy project that was conceived while joking around with 
 If you've ever been curious as to how many times a toilet has been used, then this project is for you.
 When you use the bathroom, simply click the up arrow and the counter increments.
 <p align="center">
-<img src="https://github.com/jfcbooth/tally/blob/main/pictures/20211008_170915.jpg" alt="TT" width="300"/>
+<img src="https://github.com/jfcbooth/tally/blob/main/pictures/tally.jpg" alt="TT" width="300"/>
 </p>
 
 ## Resetting the tally
